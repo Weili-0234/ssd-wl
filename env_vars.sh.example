@@ -1,0 +1,26 @@
+# Copy this file to env_vars.sh and fill in your paths:
+#   cp env_vars.sh.example env_vars.sh
+#
+# Do NOT commit env_vars.sh (it is in .gitignore).
+
+# Where HuggingFace model snapshots are stored.
+# This is the directory containing models--Qwen--Qwen3-32B/ etc.
+export SSD_HF_CACHE=/path/to/your/hf_cache
+
+# Where raw HuggingFace datasets are downloaded.
+export HF_DATASETS_CACHE=/path/to/your/hf_datasets
+
+# Where processed benchmark JSONL files live.
+# Must contain subdirectories: humaneval/, gsm8k/, alpaca/, ultrafeedback/
+# Generate with: uv run python scripts/get_data_from_hf.py
+export SSD_DATASET_DIR=/path/to/your/processed_datasets
+
+# GPU architecture for FlashInfer kernel compilation.
+#   9.0 = H100/H200
+#   8.0 = A100
+#   8.9 = L40/4090
+export SSD_CUDA_ARCH=FIX_ME
+
+# HuggingFace token (needed for gated models like Llama).
+# Get yours at https://huggingface.co/settings/tokens
+export HF_TOKEN=your_token_here
