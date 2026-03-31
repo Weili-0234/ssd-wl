@@ -38,7 +38,12 @@ def download(models):
     for name in models:
         print(f"Downloading {name}...")
         try:
-            snapshot_download(repo_id=name, cache_dir=CACHE_DIR, resume_download=True)
+            snapshot_download(
+                repo_id=name,
+                cache_dir=CACHE_DIR,
+                resume_download=True,
+                token=os.environ.get("HF_TOKEN"),
+            )
             print(f"  done")
         except Exception as e:
             print(f"  failed: {e}")

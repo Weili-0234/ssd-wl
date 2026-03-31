@@ -174,28 +174,52 @@ This runs 3 modes across 4 datasets (12 runs total). Each mode reloads the model
 | SD | Synchronous speculative decoding | 4 | `--gpus 4 --spec --k 6` |
 | SSD | Async speculative decoding (Saguaro) | 5 | `--gpus 5 --spec --async --k 4 --f 3` |
 
-Results are saved to `bench/results/` as individual log files per mode/dataset.
+The script saves logs to `bench/results/`:
+
+```
+bench/results/
+  ar_full.log            # all AR output (all 4 datasets, combined)
+  ar_humaneval.log       # AR output for humaneval only
+  ar_alpaca.log          # ...
+  sd_full.log            # all SD output
+  sd_humaneval.log
+  ssd_full.log           # all SSD output
+  ssd_humaneval.log
+  qwen_results.json      # parsed throughputs in JSON
+```
+
+The `*_full.log` files are what `bench/analyze_results.py` reads.
 
 **Important**: the script uses `python -O` automatically. The `-O` flag disables
 Python debug assertions that add significant overhead to every inference step.
 
 ### Running Individual Modes
 
+If you want to run modes separately (e.g., on different nodes in parallel),
+pipe output to a log file so `analyze_results.py` can parse it later:
+
 ```bash
 source env_vars.sh
+mkdir -p bench/results
 
 # AR -- autoregressive baseline, 4 GPUs
 uv run python -O bench/bench.py --qwen --size 32 --gpus 4 \
-    --b 1 --temp 0 --numseqs 128 --output_len 512 --all
+    --b 1 --temp 0 --numseqs 128 --output_len 512 --all \
+    2>&1 | tee bench/results/ar_full.log
 
 # SD -- synchronous speculative decoding, 4 GPUs, K=6
 uv run python -O bench/bench.py --qwen --size 32 --gpus 4 --spec --k 6 \
-    --b 1 --temp 0 --numseqs 128 --output_len 512 --all
+    --b 1 --temp 0 --numseqs 128 --output_len 512 --all \
+    2>&1 | tee bench/results/sd_full.log
 
 # SSD -- async speculative decoding (Saguaro), 5 GPUs, K=4, fan-out=3
 uv run python -O bench/bench.py --qwen --size 32 --gpus 5 --spec --async --k 4 --f 3 \
-    --b 1 --temp 0 --numseqs 128 --output_len 512 --all
+    --b 1 --temp 0 --numseqs 128 --output_len 512 --all \
+    2>&1 | tee bench/results/ssd_k4_full.log
 ```
+
+The log filenames matter: `analyze_results.py` derives labels from them
+(`ar_full.log` -> "AR", `ssd_k4_full.log` -> "SSD K=4", etc.).
 
 Replace `--all` with a dataset flag to run a single dataset:
 
